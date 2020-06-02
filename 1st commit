@@ -1,0 +1,54 @@
+
+%this data from the assignment sheet
+% the format is: 
+% array_name = [eta, 2.5i, M3];
+
+piston_mass = [0.489,0.468,0.468];
+con_rod_mass = [0.620,0.640,0.595];
+con_rod_moment_of_inertia = [0.020,0.021,0.018];
+con_rod_length = [0.130,0.135,0.135];
+location_of_CoG = [0.043,0.045,0.043];
+crank_throw = [0.0405];
+
+for con_rod = [1,2,3];
+%theta and phi are associated through the following formula.
+theta = linspace(0,2*pi,1000);
+phi = asin((crank_throw*sin(theta))./con_rod_length(con_rod));
+
+engine_rpm = 7000;
+Wab = 2*pi*(engine_rpm/60);  %this is the angular velocity of the crankshaft in radians per second.
+
+%Velocities for Point B
+Velocity_at_point_B_in_x = crank_throw*cos(theta)*Wab;
+Velocity_at_point_B_in_y = -crank_throw*sin(theta)*Wab;
+Velocity_of_point_B = sqrt((Velocity_at_point_B_in_x).^2+(Velocity_at_point_B_in_y).^2);
+
+%Accelerations for point B
+Acceleration_at_point_B_in_x = -crank_throw*sin(theta)*Wab^2;
+Acceleration_at_point_B_in_y = -crank_throw*cos(theta)*Wab^2;
+Acceleration_of_point_B = sqrt((-crank_throw*sin(theta)*Wab^2).^2+(-crank_throw*cos(theta)*Wab^2).^2);
+
+%Angular acceleration of the crankshaft is zero due to the constant angular
+%velocity.  ie; 7000rpm is constant.
+
+%Angular velocity of the link BC is found from the following equation.
+Wbc = (crank_throw*cos(theta)*Wab)/(con_rod_length(con_rod).*cos(phi));
+
+%Angular acceleration of the link BC is found from the following equation.
+AlphaBC = ((Wbc)^2.*con_rod_length(con_rod).*sin(phi)-crank_throw.*sin(theta).*(Wab)^2)./(con_rod_length(con_rod).*cos(phi));
+
+
+Velocity_at_point_C_in_y = con_rod_length(con_rod).*sin(phi)*Wbc-crank_throw*sin(theta)*Wab;
+Acceleration_at_point_C_in_y = -crank_throw.*cos(theta).*(Wab)^2-con_rod_length(con_rod).*sin(phi).*AlphaBC-con_rod_length(con_rod).*cos(phi).*(Wbc)^2;
+
+figure(1);
+hold on;
+plot(theta, Acceleration_at_point_C_in_y);
+ylabel('m/s^2')
+xlabel({'Crankshaft Angle', '(at 7000 rpm)'})
+xticks([0 pi/2 pi 3*pi/2 2*pi])
+xticklabels({'0', 'pi/2', 'pi', '3pi/2', '2pi'})
+title('Acceleration of Point C in Y Vs. Crankshaft Angle')
+legend('ETA','2.5i','i3')
+end
+
